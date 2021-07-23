@@ -17,10 +17,23 @@ function launchTest() {
   if (/count=(\d+)/.test(countArg)) {
     count = RegExp.$1
   }
+  let exampleWords = []
   if (count > 0) {
     exampleWords = getRamdonWords(count, wordList) // 随机测试用例
     console.log(blue('执行随机测试...'))
   } else {
+    exampleWords = [
+      'chieftain',
+      'hypoderma',
+      'elastin',
+      'lythraceous',
+      'aromaticity',
+      'forbearing',
+      'sandhog',
+      'fumble',
+      'overcunning',
+      'amplexus'
+    ]
     console.log(blue('执行普通测试...'))
   }
   console.log(blue(`测试用例数量：${exampleWords.length}`))
