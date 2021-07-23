@@ -32,21 +32,67 @@ function Machine(wordList) {
      */
     player: function (wordLen) {
       return {
+        restWordList: wordList.filter(w => w.length === wordLen),
+        guessed: [],
+        result: '_'.repeat(wordLen),
         /**
          * 猜测单词内的字母
          * @returns {string}
          */
         guess: function () {
-          let letter = ''
-          // TODO
-          return letter
+          const exLetters = this.guessed.join('')
+          const regText = this.result.replace(/_+/g, w => `([^${exLetters}]{${w.length}})`)
+          const reg = new RegExp(regText)
+          const positionCounter = [] // 各个缺口位置的统计
+          this.restWordList = this.restWordList.filter(word => {
+            const execRes = reg.exec(word)
+            if (!execRes) return
+            let subRes = [word]
+            if (execRes.length > 1) {
+              subRes = execRes.slice(1, execRes.length) // 取出各缺口的匹配结果
+            }
+            subRes.forEach((subLetters, index) => {
+              let stator = positionCounter[index]
+              if (!stator) {
+                stator = {
+                  max: { letter: '', count: 0 },
+                  letterCount: 0,
+                  counter: {}
+                }
+                positionCounter[index] = stator
+              }
+              const { max, counter } = stator
+              subLetters.split('').forEach(letter => {
+                let count = counter[letter]
+                if (!count) {
+                  count = 0
+                  stator.letterCount++
+                }
+                count++
+                counter[letter] = count
+                if (!max.letter) max.letter = letter
+                if (count > max.count) {
+                  max.letter = letter
+                  max.count = count
+                }
+              })
+            })
+            return true
+          })
+          const statMin = positionCounter.reduce((min, cur) => {
+            if (cur.letterCount < min.letterCount) min = cur
+            return min
+          }, { letterCount: Infinity })
+          const guessLetter = statMin.max.letter
+          this.guessed.push(guessLetter)
+          return guessLetter
         },
         /**
          * 接收猜测结果
          * @param {string} result 猜测结果
          */
         response: function (result) {
-          // TODO
+          this.result = result
         }
       };
     }
