@@ -31,24 +31,51 @@ function Machine(wordList) {
      * @returns {object} 玩家对象
      */
     player: function (wordLen) {
-      return {
+      const player = {
+        wordList: wordList.filter(w => w.length === wordLen),
+        guessed: [],
+        result: '_'.repeat(wordLen),
         /**
          * 猜测单词内的字母
          * @returns {string}
          */
         guess: function () {
-          let letter = ''
-          // TODO
-          return letter
+          const exLetters = this.guessed.join('')
+          const regText = this.result.replace(/_+/g, w => `([^${exLetters}]{${w.length}})`)
+          const reg = new RegExp(regText)
+          const counter = {}
+          const max = { letter: '', count: 0 }
+          this.wordList = this.wordList.filter(word => {
+            const execRes = reg.exec(word)
+            if (!execRes) return
+            const letters = execRes.length === 1 ? word.split('') : execRes.slice(1, execRes.length).join('').split('')
+            letters.forEach(letter => {
+              let count = counter[letter]
+              if (!count) count = 0
+              count++
+              counter[letter] = count
+              if (!max.letter) max.letter = letter
+              if (count > max.count) {
+                max.letter = letter
+                max.count = count
+              }
+            })
+            return true
+          })
+          this.guessed.push(max.letter)
+          return max.letter
         },
         /**
-         * 接收猜测结果
-         * @param {string} result 猜测结果
-         */
+        * 接收猜测结果
+        * @param {string} result 猜测结果
+        */
         response: function (result) {
-          // TODO
+          this.result = result
         }
-      };
+      }
+      player.guess = player.guess.bind(player)
+      player.response = player.response.bind(player)
+      return player
     }
   };
 }
