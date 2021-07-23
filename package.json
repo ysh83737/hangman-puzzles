@@ -1,0 +1,9 @@
+{
+  "scripts": {
+    "test": "node ./test.js",
+    "full": "node ./test.js count=500"
+  },
+  "dependencies": {
+    "chalk": "^4.1.1"
+  }
+}
