@@ -24,16 +24,16 @@ function launchTest() {
     console.log(blue('执行随机测试...'))
   } else {
     exampleWords = [
-      'chieftain',
-      'hypoderma',
-      'elastin',
-      'lythraceous',
-      'aromaticity',
-      'forbearing',
-      'sandhog',
-      'fumble',
-      'overcunning',
-      'amplexus'
+      'actinometer',
+      'beefsteak',
+      'gandhism',
+      'heredity',
+      'countryseat',
+      'elasticity',
+      'benumbed',
+      'gavotte',
+      'causal',
+      'outsell'
     ]
     console.log(blue('执行普通测试...'))
   }
