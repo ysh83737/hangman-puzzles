@@ -1,6 +1,7 @@
 const { red, green, blue } = require('chalk')
 const Machine = require('./program')
 const testLogger = require('./testLogger')
+const addRecords = require('./testRecords/record')
 const CONTROL = {
   WORD_LEN_MIN: 6, // 限制单词最小长度6
   WORD_LEN_MAX: 11, // 最大长度11
@@ -42,8 +43,9 @@ function launchTest() {
 
 function gameRunner(exampleWords = []) {
   const start = new Date()
-  const stat = { pass: 0, fail: 0, all: true, failWords: [] }
-  exampleWords.forEach((word, index) => {
+  const stat = { passCount: 0, failCount: 0, allPass: true, failWords: [], passRate: 0 }
+  const testResult = exampleWords.map((word, index) => {
+    const wordStart = new Date()
     const len = word.length
     const player = game.player(len)
     const results = word.split('').map(source => { // 结果初始化
@@ -67,29 +69,43 @@ function gameRunner(exampleWords = []) {
       player.response(resultText)
       times++
     }
+    const wordEnd = new Date()
+    const wordTime = wordEnd - wordStart
+    const output = {
+      time: wordTime,
+      pass: false,
+      times: times
+    }
     if (times > CONTROL.TEST_TIME_LIMIT) {
-      if (stat.all) stat.all = false
-      stat.fail++
+      if (stat.allPass) stat.allPass = false
+      stat.failCount++
       stat.failWords.push(word)
       testLogger.log(red(`单词[${word}] 猜测失败，猜测结果：${resultText}`))
     } else {
-      stat.pass++
-      testLogger.log(green(`单词[${word}] 猜测成功，猜测次数：${times}`))
+      output.pass = true
+      stat.passCount++
+      testLogger.log(green(`单词[${word}] 猜测成功，猜测次数：${times}，耗时：${wordTime}ms`))
     }
+    return output
   })
   const end = new Date()
-  const time = end - start
-  if (stat.all) {
+  const totalTime = end - start
+  const totalCount = exampleWords.length
+  stat.passRate = (stat.passCount / totalCount) * 100
+  stat.totalTime = totalTime
+  stat.totalCount = totalCount
+  if (stat.allPass) {
     console.log(green.bold('=================end================='))
-    console.log(green.bold(`全部单词猜测成功，总耗时：${time}ms`))
+    console.log(green.bold(`全部单词猜测成功，总耗时：${totalTime}ms`))
   } else {
     console.log(red.bold('=================end================='))
-    console.log(red.bold(`全部单词猜测失败，总耗时：${time}ms`))
-    console.log(red.bold(`猜测成功：${stat.pass}个`))
-    console.log(red.bold(`猜测失败：${stat.fail}个`))
-    console.log(red.bold(`猜测成功率：${((stat.pass / exampleWords.length) * 100).toFixed(2)}%`))
+    console.log(red.bold(`全部单词猜测失败，总耗时：${totalTime}ms`))
+    console.log(red.bold(`猜测成功：${stat.passCount}个`))
+    console.log(red.bold(`猜测失败：${stat.failCount}个`))
+    console.log(red.bold(`猜测成功率：${stat.passRate.toFixed(2)}%`))
     console.log(red.bold(`猜测失败的单词：`), stat.failWords)
   }
+  addRecords(testResult, stat)
 }
 // 获取词典
 function getWordList() {
