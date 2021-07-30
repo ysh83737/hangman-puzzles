@@ -28,17 +28,21 @@ function addRecords(results, stat) {
     if (pass) {
       pre.timeOfPass += time
       pre.timesOfPass += times
+      if (times > pre.maxTimes) pre.maxTimes = times
+      if (times < pre.minTimes) pre.minTimes = times
     }
     return pre
-  }, { timeAll: 0, timeOfPass: 0, timesOfPass: 0 })
+  }, { timeAll: 0, timeOfPass: 0, timesOfPass: 0, minTimes: Infinity, maxTimes: 0 })
   newRecord.averageTimeAll = sums.timeAll / totalCount // 全部平均耗时
   newRecord.averageTimeOfPass = sums.timeOfPass / passCount // 成功的平均耗时
   newRecord.averageTimesOfPass = sums.timesOfPass / passCount // 成功的平均次数
+  newRecord.maxTimes = sums.maxTimes
+  newRecord.minTimes = sums.minTimes
   records.push(newRecord)
   storage(records)
 }
 function storage(json) {
-  const data = JSON.stringify(json)
+  const data = JSON.stringify(json, null, 2)
   fs.writeFile(recordsPath, data, err => {
     if (err) {
       console.log(red('写入测试记录文件失败！', err.message))
